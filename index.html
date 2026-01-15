@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GeoNames AJAX</title>
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 30px;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background: #f4f4f4;
+    }
+</style>
+</head>
+<body>
+
+<h1>GeoNames Data</h1>
+<table>
+<tr>
+    <th>API Name</th>
+    <th>API Description</th>
+    <th>Loading Data</th>
+</tr>
+<tr>
+<th>Country API Search</th>
+<th>This API search data from the geonames API JSON extraction hyperlink to load data about different country regions</th>
+<th><button onclick="loadCountries()">Load Countries</button></th>
+</tr>
+<tr>
+<th>Weather API Search</th>
+<th>This API search data from the geonames API JSON extraction hyperlink to load data about different weather conditions</th>
+<th>
+<button onclick="loadWeather()">Load Weather</button>
+</tr>
+<tr>
+<th>Earthquake API Search</th>
+<th>This API search data from the geonames API JSON extraction hyperlink to load data about different earthquake disasters</th>
+<th>
+<button onclick="loadEarthquakes()">Load Earthquakes</button>
+</th>
+</table>
+<div id="result"></div>
+<script>
+function fetchData(type, callback) {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", "fetch.php?type=" + type, true);
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            callback(JSON.parse(xhr.responseText));
+        }
+    };
+    xhr.send();
+}
+
+// ---- COUNTRIES ----
+function loadCountries() {
+    fetchData("countries", data => {
+        let html = `
+            <h2>Countries</h2>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Capital</th>
+                    <th>Population</th>
+                    <th>Area</th>
+                </tr>
+        `;
+
+        data.geonames.forEach(country => {
+            html += `
+                <tr>
+                    <td>${country.countryName}</td>
+                    <td>${country.capital}</td>
+                    <td>${country.population}</td>
+                    <td>${country.areaInSqKm}</td>
+                </tr>
+            `;
+        });
+
+        html += `</table>`;
+        document.getElementById("result").innerHTML = html;
+    });
+}
+
+// ---- WEATHER ----
+function loadWeather() {
+    fetchData("weather", data => {
+        let html = `
+            <h2>Weather</h2>
+            <table>
+                <tr>
+                    <th>Station</th>
+                    <th>Temperature</th>
+                    <th>Humidity</th>
+                    <th>Clouds</th>
+                </tr>
+        `;
+
+        data.weatherObservations.forEach(w => {
+            html += `
+                <tr>
+                    <td>${w.stationName}</td>
+                    <td>${w.temperature}</td>
+                    <td>${w.humidity}</td>
+                    <td>${w.clouds}</td>
+                </tr>
+            `;
+        });
+
+        html += `</table>`;
+        document.getElementById("result").innerHTML = html;
+    });
+}
+
+// ---- EARTHQUAKES ----
+function loadEarthquakes() {
+    fetchData("earthquakes", data => {
+        let html = `
+            <h2>Earthquakes</h2>
+            <table>
+                <tr>
+                    <th>Date</th>
+                    <th>Magnitude</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                </tr>
+        `;
+
+        data.earthquakes.forEach(eq => {
+            html += `
+                <tr>
+                    <td>${eq.datetime}</td>
+                    <td>${eq.magnitude}</td>
+                    <td>${eq.lat}</td>
+                    <td>${eq.lng}</td>
+                </tr>
+            `;
+        });
+
+        html += `</table>`;
+        document.getElementById("result").innerHTML = html;
+    });
+}
+</script>
+
+</body>
+</html>
